@@ -63,10 +63,10 @@ func main() {
 			domains = append(domains, s.Text())
 		}
 	}
-	start := time.Now()
+	// start := time.Now()
 	ParamMiner(domains, Concurrency, HttpHeaders, RequestMethod, WordlistPath);
-	elapsed := time.Since(start)
-	fmt.Println(elapsed)
+	// elapsed := time.Since(start)
+	// fmt.Println(elapsed)
 }
 
 func readWordlist (loction string) ([]string, error){
@@ -156,6 +156,7 @@ func ParamMiner(domains []string, concurrency int, headers []string, method stri
 					printParamsFound(domain, params)
 				} else {
 					// fmt.Println("Skipping ", domain)
+					fmt.Println(domain)
 				}
 			}
 			findParamWG.Done()
@@ -325,7 +326,6 @@ func checkStability(client *http.Client, domain string, method string, headers [
 		randomParamDomain := addQueryParamsToURL(domain, randomParams);
 
 		if response, err := HttpRequest(client, randomParamDomain, method, headers); err == nil {
-			fmt.Println(response)
 			contentLength := len(response)
 			if _, ok := tempDomainContenttypeCountMap[contentLength]; ok {
 				tempDomainContenttypeCountMap[contentLength] = tempDomainContenttypeCountMap[contentLength] + 1
@@ -351,8 +351,8 @@ func checkStability(client *http.Client, domain string, method string, headers [
 	}
 	
 	if tempMaxCount < 2 {
-		fmt.Println("Cannot Determine content length for ", domain, " getting new content type everytime.")
-		fmt.Println("Either Everything is reflected or site is sending junk in response")
+		// fmt.Println("Cannot Determine content length for ", domain, " getting new content type everytime.")
+		// fmt.Println("Either Everything is reflected or site is sending junk in response")
 		return 0, true
 	} else {
 		return domainLength , false
@@ -409,10 +409,14 @@ func HttpRequest(client *http.Client, domain string, method string, headers []st
 	}
 	defer resp.Body.Close()
 
-	if resp.Status != "200 OK" {
+	if resp.Status == "200 OK" { // 200 means all good. 400 means param missing
+		
+	} else if resp.Status == "400 " {
+
+	}else {
 		// error in request
-		return "", errors.New("Bad Request. Response:"+resp.Status)
-	} 
+		return "", errors.New("Bad Request... Response:"+resp.Status)
+	}
 
 	bytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
