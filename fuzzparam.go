@@ -155,7 +155,7 @@ func ParamMiner(domains []string, concurrency int, headers []string, method stri
 					params := findParams( client, method, headers, domain, ParametersList)
 					printParamsFound(domain, params)
 				} else {
-					fmt.Println("Skipping ", domain)
+					// fmt.Println("Skipping ", domain)
 				}
 			}
 			findParamWG.Done()
@@ -325,6 +325,7 @@ func checkStability(client *http.Client, domain string, method string, headers [
 		randomParamDomain := addQueryParamsToURL(domain, randomParams);
 
 		if response, err := HttpRequest(client, randomParamDomain, method, headers); err == nil {
+			fmt.Println(response)
 			contentLength := len(response)
 			if _, ok := tempDomainContenttypeCountMap[contentLength]; ok {
 				tempDomainContenttypeCountMap[contentLength] = tempDomainContenttypeCountMap[contentLength] + 1
