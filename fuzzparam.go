@@ -39,8 +39,15 @@ var ParametersList []string
 var SiteLengthMap = map[string]int{} // {site: 0, site2: 1200} (content length)
 // var SiteParamsMap = map[string][](map[string]string{}){} // {site: [{param1:val}, {param2:val} ... ] }
 var SiteParamsMap =  make(map[string]map[string]string) // {site: [{param1:val}, {param2:val} ... ] }
+var SiteStatusMap = make(map[string]string)
 const letters = "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 const SITE_THREADS = 4
+
+var correctStatus = map[string]bool{
+	"200 OK": true,
+	"400 ": true,
+	"302 Found": true,
+}
 
 func main() {
 	var domains []string
@@ -135,7 +142,7 @@ func ParamMiner(domains []string, concurrency int, headers []string, method stri
 			defer mainWG.Done()
 			length, problem := checkStability(client, domain, method, headers)
 			if problem {
-				SiteLengthMap[domain] = 0
+				SiteLengthMap[domain] = -1
 			} else {
 				SiteLengthMap[domain] = length
 			}
@@ -151,7 +158,7 @@ func ParamMiner(domains []string, concurrency int, headers []string, method stri
 
 		go func () {
 			for domain := range channelDomain {
-				if SiteLengthMap[domain] != 0 {
+				if SiteLengthMap[domain] != -1 {
 					params := findParams( client, method, headers, domain, ParametersList)
 					printParamsFound(domain, params)
 				} else {
@@ -247,7 +254,7 @@ func findMaxParams(client *http.Client, method string, headers []string,  domain
 			// if response == other continue
 			if statusCode == "414 Request-URI Too Long" {
 				continue
-			} else if statusCode == "200 OK" {
+			} else if value, found := SiteStatusMap[domain]; found && value == statusCode {
 				maxParams = totalParams
 				break
 			} else {
@@ -355,6 +362,13 @@ func checkStability(client *http.Client, domain string, method string, headers [
 		// fmt.Println("Either Everything is reflected or site is sending junk in response")
 		return 0, true
 	} else {
+		
+		if status, err := HttpRequestGetResponseStatus(client, domain, method, headers); err == nil {
+			SiteStatusMap[domain] = status
+		} else {
+			SiteStatusMap[domain] = "200 OK"
+		}
+
 		return domainLength , false
 	}
 	
@@ -409,11 +423,8 @@ func HttpRequest(client *http.Client, domain string, method string, headers []st
 	}
 	defer resp.Body.Close()
 
-	if resp.Status == "200 OK" { // 200 means all good. 400 means param missing
-		
-	} else if resp.Status == "400 " {
-
-	}else {
+	_, found := correctStatus[resp.Status]
+	if !found {
 		// error in request
 		return "", errors.New("Bad Request... Response:"+resp.Status)
 	}
