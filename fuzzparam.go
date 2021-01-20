@@ -33,7 +33,8 @@ func (i *arrayFlags) Set(value string) error {
 
 var HttpHeaders arrayFlags // Http headers
 var RequestMethod string // GET/POST
-var WordlistPath string // GET/POST
+var WordlistPath string // path to wordlist
+var ProxyUrl string // proxy url 
 var Concurrency int
 var ParametersList []string
 var SiteLengthMap = map[string]int{} // {site: 0, site2: 1200} (content length)
@@ -59,6 +60,8 @@ func main() {
 	flag.StringVar(&RequestMethod, "X", "GET", "HTTP request method GET/POST/PUT")
 	// Wordlist to use
 	flag.StringVar(&WordlistPath, "w", "/usr/share/dict/words", "Location of wordlist")
+	// proxy url
+	flag.StringVar(&ProxyUrl, "x", "", "Proxy url in format-> http://127.0.0.1:8080")
 	
 	flag.Parse()
 	
@@ -99,22 +102,43 @@ func ParamMiner(domains []string, concurrency int, headers []string, method stri
 	findParamWG := &sync.WaitGroup{}
 	channelDomain := make(chan string)
 	ParametersList, err := readWordlist(wordlistPath)
+	var tr *http.Transport;
 
 	if err != nil {
 		fmt.Println("Error! Wordlist file doesnt exist.")
 		panic(err)
 	}
-
-	var tr = &http.Transport{
-		MaxIdleConns:      30,
-		IdleConnTimeout:   time.Second,
-		DisableKeepAlives: true,
-		TLSClientConfig:   &tls.Config{InsecureSkipVerify: true},
-		DialContext: (&net.Dialer{
-			Timeout:   timeout,
-			KeepAlive: time.Second,
-		}).DialContext,
+	
+	if ProxyUrl != "" {
+		if proxyUrlParsed, err := url.Parse(ProxyUrl); err != nil {
+			fmt.Println("Invalid proxy url. Use format - http://127.0.0.1:8080 ")
+			panic(err)
+		} else {
+			tr = &http.Transport{
+				MaxIdleConns:      30,
+				IdleConnTimeout:   time.Second,
+				DisableKeepAlives: true,
+				TLSClientConfig:   &tls.Config{InsecureSkipVerify: true},
+				Proxy: http.ProxyURL(proxyUrlParsed),
+				DialContext: (&net.Dialer{
+					Timeout:   timeout,
+					KeepAlive: time.Second,
+				}).DialContext,
+			}
+		}
+	} else {
+		tr = &http.Transport{
+			MaxIdleConns:      30,
+			IdleConnTimeout:   time.Second,
+			DisableKeepAlives: true,
+			TLSClientConfig:   &tls.Config{InsecureSkipVerify: true},
+			DialContext: (&net.Dialer{
+				Timeout:   timeout,
+				KeepAlive: time.Second,
+			}).DialContext,
+		}
 	}
+	
 
 	re := func(req *http.Request, via []*http.Request) error {
 		return http.ErrUseLastResponse
