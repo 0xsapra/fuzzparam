@@ -110,9 +110,11 @@ func ParamMiner(domains []string, concurrency int, headers []string, method stri
 	}
 	
 	if ProxyUrl != "" {
-		if proxyUrlParsed, err := url.Parse(ProxyUrl); err != nil {
+		if proxyUrlParsed, err := url.Parse(ProxyUrl); err != nil || proxyUrlParsed.Scheme != "http" {
 			fmt.Println("Invalid proxy url. Use format - http://127.0.0.1:8080 ")
-			panic(err)
+			fmt.Println(err)
+			os.Exit(1)
+
 		} else {
 			tr = &http.Transport{
 				MaxIdleConns:      30,
@@ -347,11 +349,11 @@ func checkStability(client *http.Client, domain string, method string, headers [
 	for i := 0; i <= 5; i++ {
 
 		randomParams := []string{
-			getRandomString(8),
-			getRandomString(7),
-			getRandomString(8),
-			getRandomString(6),
-			getRandomString(7),
+			getRandomString(3+i),
+			getRandomString(2+i),
+			getRandomString(3+i),
+			getRandomString(1+i),
+			getRandomString(2+i),
 		}
 		
 		randomParamDomain := addQueryParamsToURL(domain, randomParams);

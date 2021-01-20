@@ -18,6 +18,17 @@ $ go build fuzzparam.go
 ```
 
 
+## Flags supported
+
+| Flag      | Description | Example |
+| ----------- | ----------- | ----------- |
+| -X      | HTTP Method       | -X POST |
+| -x   | Proxy Url        | http://127.0.0.1:8080 |
+| -c   | Concurrency/threads        | Default 25 |
+| -H   | Headers        | -H "Cookie: test:1" -H "X-Forwarded-For: x.com" |
+| -w   | Path to wordlist        | -w ./parameters.txt  |
+
+
 ## Usage
 
 ```bash
@@ -38,4 +49,3 @@ and, tomnonnom's `waybackurls` [https://github.com/tomnomnom/waybackurls](https:
 ```bash
 $ cat domains.txt | waybackurls | httpx | fuzzparam -w ./parameters.txt > finalUrlsWithParams.txt
 ```
-
