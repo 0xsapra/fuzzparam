@@ -23,8 +23,8 @@ $ go build fuzzparam.go
 | Flag      | Description | Example |
 | ----------- | ----------- | ----------- |
 | -X      | HTTP Method       | -X POST |
-| -x   | Proxy Url        | http://127.0.0.1:8080 |
-| -c   | Concurrency/threads        | Default 25 |
+| -x   | Proxy Url        | -x http://127.0.0.1:8080 |
+| -c   | Concurrency/threads        | -c 100 (Default 25) |
 | -H   | Headers        | -H "Cookie: test:1" -H "X-Forwarded-For: x.com" |
 | -w   | Path to wordlist        | -w ./parameters.txt  |
 
