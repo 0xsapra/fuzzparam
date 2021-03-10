@@ -12,7 +12,7 @@ TL;DR
 
 Download and Build it using following command:
 ```
-$ git clone https://github.com/Anonyme1396/fuzzparam
+$ git clone https://github.com/0xsapra/fuzzparam
 $ cd fuzzparam
 $ go build fuzzparam.go  
 ```

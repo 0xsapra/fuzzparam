@@ -185,13 +185,13 @@ func ParamMiner(domains []string, concurrency int, headers []string, method stri
 
 		go func () {
 			for domain := range channelDomain {
+				var params []string
 				if SiteLengthMap[domain] != -1 {
-					params := findParams( client, method, headers, domain, ParametersList)
-					printParamsFound(domain, params)
+					params = findParams( client, method, headers, domain, ParametersList)
 				} else {
-					// fmt.Println("Skipping ", domain)
-					fmt.Println(domain)
+					params = make([]string, 0)
 				}
+				printParamsFound(domain, params)
 			}
 			findParamWG.Done()
 		}()
