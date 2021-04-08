@@ -51,6 +51,7 @@ var correctStatus = map[string]bool{
 	"400 Bad Request": true,
 	"500 " : true,
 	"404 " : true,
+	"404 Not Found": true,
 }
 
 func main() {
