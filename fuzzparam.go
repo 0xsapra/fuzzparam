@@ -49,6 +49,8 @@ var correctStatus = map[string]bool{
 	"400 ": true,
 	"302 Found": true,
 	"400 Bad Request": true,
+	"500 " : true,
+	"404 " : true,
 }
 
 func main() {
@@ -451,6 +453,7 @@ func HttpRequest(client *http.Client, domain string, method string, headers []st
 	defer resp.Body.Close()
 
 	_, found := correctStatus[resp.Status]
+	// fmt.Println(resp.Status, found)
 	if !found {
 		// error in request
 		return "", errors.New("Bad Request... Response:"+resp.Status)
